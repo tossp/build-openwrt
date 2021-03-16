@@ -18,8 +18,8 @@ on:
       - 'ts'
       - 'master'
 #定时触发开始编译(把下面两个#去掉开启,时间设置请看定时编译说明)
- schedule:
-   - cron: 0 8 */5 * *
+  schedule:
+    - cron: 0 8 */5 * *
 
 env:
   LEDE: https://github.com/coolsnowwolf/lede
@@ -70,6 +70,7 @@ jobs:
         echo "UPLOAD_CONFIG=${UPLOAD_CONFIG}" >> $GITHUB_ENV
         echo "UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}" >> $GITHUB_ENV
         echo "UPLOAD_COWTRANSFER=${UPLOAD_COWTRANSFER}" >> $GITHUB_ENV
+        echo "UPLOAD_QN=${UPLOAD_QN}" >> $GITHUB_ENV
         echo "UPLOAD_RELEASE=${UPLOAD_RELEASE}" >> $GITHUB_ENV
         echo "SERVERCHAN_SCKEY=${SERVERCHAN_SCKEY}" >> $GITHUB_ENV
         echo "REGULAR_UPDATE=${REGULAR_UPDATE}" >> $GITHUB_ENV
@@ -315,7 +316,19 @@ jobs:
         token: ${{ secrets.REPO_TOKEN }}
         bodyFile: "update_log.txt"
         artifacts: "${{ env.FIRMWARE }}/*"
-    
+
+    - name: 发布七牛
+      uses: luochongfei/up2qn@master
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_QN == 'true' && !cancelled()
+      with:
+        bucket: static # 空间名称，按实际情况填写
+        zone: 华南 # 存储区域，按实际情况填写 备注1
+        access_key: ${{ secrets.QNAK }} # 七牛云 AccessKey 备注2
+        secret_key: ${{ secrets.QNSK }} # 七牛云 SecretKey 备注2
+        local_dir: web # 本地文件夹
+        local_exclude: "**/node_modules/**" # 要排除的内容，要符合 glob 格式
+        target_dir: / # 要上传到七牛云中的文件夹
+
     - name: 微信通知
       uses: emon100/Action-Serverchan@v2
       if: steps.organizer.outputs.status == 'success' && env.SERVERCHAN_SCKEY == 'true'
