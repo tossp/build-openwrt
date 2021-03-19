@@ -325,16 +325,19 @@ jobs:
 
     - name: 发布七牛
       uses: saltbo/uptoc@master
-      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_QN == 'true' && !cancelled()
-      with:
-        driver: qiniu
-        region: cn-south-1
-        bucket: lede-k3
-        exclude: .cache,test
-        dist: ${{ env.FIRMWARE }}
+      if: steps.organizer.outputs.status == 'success' && env.UPLOAD_QN == 'true' && !cancelled()      
+      run: |
+        wget http://devtools.qiniu.com/qshell-linux-x64-v2.4.2.zip
+        unzip qshell-linux-x64-v2.4.2.zip
+        mv qshell-linux-x64-v2.4.2 /bin/qshell
+        chmod a+x /bin/qshell
+        qshell account ${QNAK} ${QNSK} gitlab-ci
+        qshell qupload2 --check-exists --check-hash --check-size --overwrite --rescan-local --skip-suffixes=.map --log-file=/root/qn.log --thread-count=6 --src-dir=${FIRMWARE} --bucket=${BUCKET}
+        cat /root/qn.log | grep -Ev ' \[I\] [A-Z]'
       env:
-        UPTOC_UPLOADER_AK: ${{ secrets.QNAK }}
-        UPTOC_UPLOADER_SK: ${{ secrets.QNSK }}
+        QNAK: ${{ secrets.QNAK }}
+        QNSK: ${{ secrets.QNSK }}
+        BUCKET: "lede-k3"
 
     - name: 微信通知
       uses: emon100/Action-Serverchan@v2
