@@ -328,11 +328,11 @@ jobs:
       run: |
         wget http://devtools.qiniu.com/qshell-linux-x64-v2.4.2.zip
         unzip qshell-linux-x64-v2.4.2.zip
-        mv qshell-linux-x64-v2.4.2 /bin/qshell
-        chmod a+x /bin/qshell
-        qshell account ${QNAK} ${QNSK} gitlab-ci
-        qshell qupload2 --check-exists --check-hash --check-size --overwrite --rescan-local --skip-suffixes=.map --log-file=/root/qn.log --thread-count=6 --src-dir=${FIRMWARE} --bucket=${BUCKET}
-        cat /root/qn.log | grep -Ev ' \[I\] [A-Z]'
+        mv qshell-linux-x64-v2.4.2 ${Home}/qshell
+        chmod a+x ${Home}/qshell
+        ${Home}/qshell account ${QNAK} ${QNSK} ga
+        ${Home}/qshell qupload2 --check-exists --check-hash --check-size --overwrite --rescan-local --skip-suffixes=.map --log-file=${Home}/qn.log --thread-count=6 --src-dir=${FIRMWARE} --bucket=${BUCKET}
+        cat ${Home}/qn.log | grep -Ev ' \[I\] [A-Z]'
       env:
         QNAK: ${{ secrets.QNAK }}
         QNSK: ${{ secrets.QNSK }}
