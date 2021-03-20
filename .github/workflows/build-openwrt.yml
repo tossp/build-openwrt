@@ -326,12 +326,13 @@ jobs:
     - name: 发布七牛
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_QN == 'true' && !cancelled()      
       run: |
-        wget http://devtools.qiniu.com/qshell-linux-x64-v2.4.2.zip
+        wget -q http://devtools.qiniu.com/qshell-linux-x64-v2.4.2.zip
         unzip qshell-linux-x64-v2.4.2.zip
         mv qshell-linux-x64-v2.4.2 ${Home}/qshell
         chmod a+x ${Home}/qshell
         ${Home}/qshell account ${QNAK} ${QNSK} ga
         ${Home}/qshell qupload2 --check-exists --check-hash --check-size --overwrite --rescan-local --skip-suffixes=.map --log-file=${Home}/qn.log --thread-count=6 --src-dir=${FIRMWARE} --bucket=${BUCKET}
+        ${Home}/qshell qupload2 --check-exists --check-hash --check-size --overwrite --rescan-local --skip-suffixes=.map --log-file=${Home}/qn.log --thread-count=6 --src-dir=${artifact} --bucket=${BUCKET}
         cat ${Home}/qn.log | grep -Ev ' \[I\] [A-Z]'
       env:
         QNAK: ${{ secrets.QNAK }}
